@@ -19,25 +19,37 @@ public final class Algorithms {
     public static double[] returnMecanumValues(Vector2d driveVector, double rotation, double scale) {
         Vector2d iHat = new Vector2d(Math.cos(Math.PI/4), Math.sin(Math.PI / 4)); //FL and BR
         Vector2d jHat = new Vector2d(-Math.cos(Math.PI/4), Math.sin(Math.PI / 4)); //BL and FR
-        double fl = driveVector.project(iHat).magnitude();
-        double fr = driveVector.project(jHat).magnitude();
-        double bl = driveVector.project(jHat).magnitude();
-        double br = driveVector.project(iHat).magnitude();
-        fl += rotation;
-        fr -= rotation;
-        bl += rotation;
-        br -= rotation;
-        double maxPower = Math.max(Math.max(Math.abs(fl), Math.abs(fr)), Math.max(Math.abs(bl), Math.abs(br)));
-        if (maxPower > 1) {
-            fl /= maxPower;
-            fr /= maxPower;
-            bl = maxPower;
-            br = maxPower;
+        double[] vals = new double[4];
+        for (int i = 0; i < vals.length; i++) {
+            Vector2d v;
+            if (i == 0 || i == 3) {
+                v = driveVector.project(iHat);
+                vals[i] = v.magnitude() * Math.signum(v.getX());
+            } else {
+                v = driveVector.project(jHat);
+                vals[i] = v.magnitude() * Math.signum(v.getY());
+            }
         }
-        fl *= scale;
-        fr *= scale;
-        bl *= scale;
-        br *= scale;
-        return new double[] {fl, fr, bl, br};
+        double s = Math.max(Math.abs(vals[0]), Math.abs(vals[1]));
+        if (Double.compare(0, s) != 0) {
+            for (int i = 0; i < vals.length; i++) {
+                vals[i] = (vals[i] / s) * driveVector.magnitude();
+            }
+        }
+        vals[0] += rotation;
+        vals[1] -= rotation;
+        vals[2] += rotation;
+        vals[3] -= rotation;
+        double max = 0;
+        for (int i = 0; i < vals.length; i++) {
+            vals[i] = vals[i] * scale;
+            max = Math.max(max, Math.abs(vals[i]));
+        }
+        if (max > 1) {
+            for (int i = 0; i < vals.length; i++) {
+                vals[i] = vals[i] / max;
+            }
+        }
+        return vals;
     }
 }

@@ -9,7 +9,6 @@ import com.qualcomm.robotcore.hardware.IMU;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 import org.firstinspires.ftc.teamcode.common.util.Algorithms;
 import org.firstinspires.ftc.teamcode.common.util.MotorWrapper;
 
@@ -18,15 +17,15 @@ public class Drivetrain extends SubsystemBase {
     public static double DRIVETRAIN_MAX_ROTATION = 0.75;
     public static double DRIVETRAIN_MAX_DRIVE_POWER = 1;
 
-    public static double DRIVETRAIN_HEADING_P = 0;
-    public static double DRIVETRAIN_HEADING_I = 0;
-    public static double DRIVETRAIN_HEADING_D = 0;
+    public static double kP = 0;
+    public static double kI = 0;
+    public static double kD = 0;
 
     public static double DRIVETRAIN_OMEGA_THRESHOLD = 1;
 
     public static double DRIVETRAIN_HEADING_TOLERANCE = 1.5;
 
-    private PIDController headingPIDController = new PIDController(DRIVETRAIN_HEADING_P, DRIVETRAIN_HEADING_I, DRIVETRAIN_HEADING_D);
+    private final PIDController headingPIDController = new PIDController(kP, kI, kD);
 
     private final MotorWrapper[] motors;
 
@@ -36,6 +35,7 @@ public class Drivetrain extends SubsystemBase {
 
     private double yaw;
     private double targetHeadingDegrees;
+    private double rotationRate;
 
     private boolean inLeftOverRotation;
 
@@ -65,7 +65,11 @@ public class Drivetrain extends SubsystemBase {
             return;
         } else if (inLeftOverRotation) {
             drive(driveStickVector, 0);
-            if (imu.getRobotAngularVelocity(AngleUnit.DEGREES).yRotationRate < DRIVETRAIN_OMEGA_THRESHOLD) this.inLeftOverRotation = false;
+            this.rotationRate = imu.getRobotAngularVelocity(AngleUnit.DEGREES).yRotationRate;
+            if (this.rotationRate < DRIVETRAIN_OMEGA_THRESHOLD) {
+                this.inLeftOverRotation = false;
+                this.targetHeadingDegrees = this.getYaw();
+            }
             return;
         }
         double heading = this.getYaw();
@@ -97,6 +101,12 @@ public class Drivetrain extends SubsystemBase {
     public void periodic(){
         this.yaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
-        this.headingPIDController.setPID(DRIVETRAIN_HEADING_P, DRIVETRAIN_HEADING_I, DRIVETRAIN_HEADING_D);
+        telemetry.addLine("\nDT------------");
+        telemetry.addData("Heading/Yaw: ", this.yaw);
+        telemetry.addData("Target Heading/Yaw: ", this.targetHeadingDegrees);
+        telemetry.addData("Rotation Rate: ", this.rotationRate);
+        telemetry.addLine((this.inLeftOverRotation) ? "No HeadingPID" : "Heading PID");
+
+        this.headingPIDController.setPID(kP, kI, kD);
     }
 }
