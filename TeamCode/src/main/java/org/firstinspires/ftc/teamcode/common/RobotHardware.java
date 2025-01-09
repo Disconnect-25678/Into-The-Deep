@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 
 public class RobotHardware {
     public DcMotorEx[] driveMotors;
@@ -14,18 +15,26 @@ public class RobotHardware {
     public DcMotorEx leftLiftMotor;
     public DcMotorEx rightLiftMotor;
 
+    public DcMotorEx lateratorMotor;
+
+    public Servo armLeft, armRight;
+    public Servo wristLeft, wristRight;
+    public Servo clawServo;
+
     private static RobotHardware instance = null;
 
     private RobotHardware(){}
 
     /**
      * Initializes all hardware on the robot (This includes EVERYTHING)
-     * @param hardwareMap
+     * @param HardwareMap hardwareMap
      * @return this object with hardware initialized for convenience instead of calling the method after creating the object
      */
     public RobotHardware initialize(HardwareMap hardwareMap) {
         this.initializeDrivetrain(hardwareMap);
         this.initializeLift(hardwareMap);
+        this.initializeLaterator(hardwareMap);
+        this.initializeEndEffector(hardwareMap);
         return this;
     }
 
@@ -73,6 +82,34 @@ public class RobotHardware {
         this.rightLiftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         return this;
+    }
+
+    public RobotHardware initializeLaterator(HardwareMap hardwareMap) {
+        this.lateratorMotor = hardwareMap.get(DcMotorEx.class, "Laterator");
+        this.lateratorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        this.lateratorMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        this.lateratorMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        return this;
+    }
+
+    public RobotHardware initializeEndEffector(HardwareMap hardwareMap) {
+        this.armLeft = hardwareMap.get(Servo.class, "Arm left");
+        this.armRight = hardwareMap.get(Servo.class, "Arm Right");
+
+        this.armLeft.setDirection(Servo.Direction.FORWARD);
+        this.armRight.setDirection(Servo.Direction.REVERSE);
+
+        this.wristLeft = hardwareMap.get(Servo.class, "Wrist Left");
+        this.wristRight = hardwareMap.get(Servo.class, "Wrist Right");
+
+        this.wristLeft.setDirection(Servo.Direction.FORWARD);
+        this.wristRight.setDirection(Servo.Direction.REVERSE);
+
+        return this;
+    }
+
+    public void kill() {
+        instance = null;
     }
 
     public static RobotHardware getInstance() {

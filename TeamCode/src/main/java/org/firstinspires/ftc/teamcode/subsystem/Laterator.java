@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
+import androidx.core.math.MathUtils;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.arcrobotics.ftclib.controller.PIDController;
@@ -9,11 +11,15 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 @Config
-public class LiftSubsystem extends SubsystemBase {
-    public static int GROUND_POSITION = 0;
+public class Laterator extends SubsystemBase {
+    public static int MIN = 0;
     public static int MAX = 3000;
     public static int TICK_PER_REQ = 250;
     public static double RESET_SPEED = -0.3;
+
+    public static int POS_SUB = 30;
+    public static int POS_REAR_INTAKE = 0;
+    public static int POS_BUCKET = 0;
 
     public static double
         kP = 0.025,
@@ -22,8 +28,9 @@ public class LiftSubsystem extends SubsystemBase {
 
     public static double kF = 0;
 
+    public static int POS_STOW = 0;
+
     private final DcMotorEx leftMotor;
-    private final DcMotorEx rightMotor;
 
     private final PIDController controller;
 
@@ -34,11 +41,10 @@ public class LiftSubsystem extends SubsystemBase {
 
     private final Telemetry telemetry;
 
-    public LiftSubsystem(DcMotorEx leftMotor, DcMotorEx rightMotor, Telemetry telemetry){
+    public Laterator(DcMotorEx leftMotor, Telemetry telemetry){
         super();
 
         this.leftMotor = leftMotor;
-        this.rightMotor = rightMotor;
         this.telemetry = telemetry;
 
         this.controller = new PIDController(kP, kI, kD);
@@ -60,30 +66,28 @@ public class LiftSubsystem extends SubsystemBase {
     public void reset(){
         this.setPower(0);
         this.leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        this.rightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         this.leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        this.rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        this.target = GROUND_POSITION;
+        this.target = MIN;
         controller.reset();
         this.resetting = false;
     }
 
-    public void setTarget(int target){
-        this.target = target;
+    public void setTarget(int target) {
+        this.target = MathUtils.clamp(target, MIN, MAX);
     }
 
     public void move(double du){
         if (Double.compare(0, du) != 0) {
             int add = (int) (Math.round(du * TICK_PER_REQ));
             if (this.target + add > MAX) this.target = MAX;
-            else if (this.target + add < GROUND_POSITION)
-                this.target = GROUND_POSITION;
+            else if (this.target + add < MIN)
+                this.target = MIN;
             else this.target += add;
         }
     }
 
     public void moveManually(double speed){
-        if (this.currentPosition < MAX && this.currentPosition > GROUND_POSITION){
+        if (this.currentPosition < MAX && this.currentPosition > MIN){
             triggerMoving = true;
             this.setPower(speed);
         } else {
@@ -96,16 +100,35 @@ public class LiftSubsystem extends SubsystemBase {
         this.target = currentPosition;
     }
 
+    public void setScaleTarget(double d) {
+        double ds = MathUtils.clamp(d, 0d, 1d);
+        this.setTarget((int)(ds * (MAX - MIN) + MIN));
+    }
+
+    public void setSubScorePosition() {
+        this.setTarget(POS_SUB);
+    }
+
+    public void setBucketScorePosition() {
+        this.setTarget(POS_BUCKET);
+    }
+
+    public void setRearIntakePosition() {
+        this.setTarget(POS_REAR_INTAKE);
+    }
+
+    public void stow() {
+        this.setTarget(POS_STOW);
+    }
 
     private void setPower(double power){
         this.leftMotor.setPower(power);
-        this.rightMotor.setPower(power);
-        this.telemetry.addData("lift power: ", power);
+        this.telemetry.addData("Laterator power: ", power);
     }
 
     @Override
     public void periodic(){
-        telemetry.addLine("\n--Lift---------------------------------");
+        telemetry.addLine("\n--Laterator---------------------------------");
         this.currentPosition = this.leftMotor.getCurrentPosition();
 
         this.controller.setPID(kP, kI, kD);

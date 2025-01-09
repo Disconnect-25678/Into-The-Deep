@@ -16,8 +16,9 @@ public abstract class CommandOpModeEx extends CommandOpMode {
     public void initialize() {
         CommandScheduler.getInstance().reset();
         this.telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), this.telemetry);
-        schedule(new RunCommand(telemetry::update));
         this.timer = new LoopTimer(telemetry);
         reader = new BulkReader(hardwareMap);
+        schedule(new RunCommand(telemetry::update));
+        schedule(new RunCommand(timer::updateLoop));
     }
 }

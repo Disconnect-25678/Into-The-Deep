@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmode.teleop;
 
+import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.RunCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -16,9 +17,12 @@ public class DrivetrainOp extends CommandOpModeEx {
     private Drivetrain drivetrain;
     private GamepadEx gamepad;
 
+    private boolean usingHeadingPID;
+
     @Override
     public void initialize(){
         super.initialize();
+        usingHeadingPID = false;
         gamepad = new GamepadEx(gamepad1);
 
         drivetrain = new Drivetrain(RobotHardware.getInstance().initializeDrivetrain(hardwareMap).driveMotors,
@@ -28,14 +32,23 @@ public class DrivetrainOp extends CommandOpModeEx {
         gamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
                 new RunCommand(drivetrain::resetYaw, drivetrain)
         );
+
+        gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+                new InstantCommand(() -> usingHeadingPID = !usingHeadingPID)
+        );
+
+        schedule(new RunCommand(telemetry::update));
     }
 
     @Override
     public void run() {
         super.run();
+        if (usingHeadingPID)
+            drivetrain.driveFacingAngle(Algorithms.mapJoystick(gamepad1.left_stick_x, -gamepad1.left_stick_y), gamepad1.right_stick_x);
+        else
+            drivetrain.drive(Algorithms.mapJoystick(gamepad1.left_stick_x, -gamepad1.left_stick_y), gamepad1.right_stick_x);
 
-        drivetrain.driveFacingAngle(Algorithms.mapJoystick(gamepad1.left_stick_x, -gamepad1.left_stick_y), gamepad1.right_stick_x);
-
+        telemetry.addData("Using HeadingPID: ", usingHeadingPID);
         this.timer.updateLoop();
     }
 }

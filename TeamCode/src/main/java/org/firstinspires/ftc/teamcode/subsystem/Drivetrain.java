@@ -95,6 +95,7 @@ public class Drivetrain extends SubsystemBase {
 
     public void resetYaw() {
         this.imu.resetYaw();
+        this.targetHeadingDegrees = 0;
     }
 
     @Override
