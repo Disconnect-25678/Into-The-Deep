@@ -103,9 +103,9 @@ public class Drivetrain extends SubsystemBase {
         this.yaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
 
         telemetry.addLine("\nDT------------");
-        telemetry.addData("Heading/Yaw: ", this.yaw);
-        telemetry.addData("Target Heading/Yaw: ", this.targetHeadingDegrees);
-        telemetry.addData("Rotation Rate: ", this.rotationRate);
+        telemetry.addData("dt-Heading/Yaw: ", this.yaw);
+        telemetry.addData("dt-Target Heading/Yaw: ", this.targetHeadingDegrees);
+        telemetry.addData("dt-Rotation Rate: ", this.rotationRate);
         telemetry.addLine((this.inLeftOverRotation) ? "No HeadingPID" : "Heading PID");
 
         this.headingPIDController.setPID(kP, kI, kD);

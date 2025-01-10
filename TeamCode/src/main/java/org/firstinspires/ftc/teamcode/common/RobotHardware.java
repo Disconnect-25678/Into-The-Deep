@@ -105,6 +105,9 @@ public class RobotHardware {
         this.wristLeft.setDirection(Servo.Direction.FORWARD);
         this.wristRight.setDirection(Servo.Direction.REVERSE);
 
+        this.clawServo = hardwareMap.get(Servo.class, "Claw Servo");
+        this.clawServo.setDirection(Servo.Direction.FORWARD);
+
         return this;
     }
 

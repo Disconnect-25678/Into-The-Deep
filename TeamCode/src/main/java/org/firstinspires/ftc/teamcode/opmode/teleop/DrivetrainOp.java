@@ -30,7 +30,7 @@ public class DrivetrainOp extends CommandOpModeEx {
                                     this.telemetry);
 
         gamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
-                new RunCommand(drivetrain::resetYaw, drivetrain)
+                new InstantCommand(drivetrain::resetYaw, drivetrain)
         );
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(

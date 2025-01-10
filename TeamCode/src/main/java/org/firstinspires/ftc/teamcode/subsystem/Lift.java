@@ -163,10 +163,10 @@ public class Lift extends SubsystemBase {
             this.setPower(power + kF);
         }
 
-        telemetry.addData("current position: ", this.currentPosition);
+        telemetry.addData("lift-current position: ", this.currentPosition);
 
-        telemetry.addData("triggerMoving?: ", triggerMoving);
-        this.telemetry.addData("target: ", this.target);
+        telemetry.addData("lift-triggerMoving?: ", triggerMoving);
+        this.telemetry.addData("lift-target: ", this.target);
     }
 
 }

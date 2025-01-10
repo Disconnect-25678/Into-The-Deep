@@ -138,10 +138,10 @@ public class Laterator extends SubsystemBase {
             this.setPower(power + kF);
         }
 
-        telemetry.addData("current position: ", this.currentPosition);
+        telemetry.addData("laterator-current position: ", this.currentPosition);
 
-        telemetry.addData("triggerMoving?: ", triggerMoving);
-        this.telemetry.addData("target: ", this.target);
+        telemetry.addData("laterator-triggerMoving?: ", triggerMoving);
+        this.telemetry.addData("laterator-target: ", this.target);
     }
 
 }

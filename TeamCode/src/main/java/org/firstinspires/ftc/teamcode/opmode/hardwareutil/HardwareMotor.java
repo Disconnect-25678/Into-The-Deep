@@ -15,7 +15,7 @@ public class HardwareMotor extends OpMode {
 
     private DcMotorEx motor;
 
-    public static int reverse = 0;
+    public static DcMotorSimple.Direction DIRECTION = DcMotorSimple.Direction.FORWARD;
 
     public static String name = "Lift Left";
 
@@ -38,8 +38,7 @@ public class HardwareMotor extends OpMode {
 
     @Override
     public void loop() {
-        if (reverse == 0) this.motor.setDirection(DcMotorSimple.Direction.FORWARD);
-        else if (reverse == 1) this.motor.setDirection(DcMotorSimple.Direction.REVERSE);
+        this.motor.setDirection(DIRECTION);
 
         telemetry.addData("pos: ", motor.getCurrentPosition());
         telemetry.addData("dir: ", motor.getDirection());

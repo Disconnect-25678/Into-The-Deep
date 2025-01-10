@@ -12,8 +12,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class HardwareServo extends OpMode {
     private Servo servo;
     public static double pos = 0;
-    public static int reverse = 0;
-    public static String str = "Claw Left";
+    public static Servo.Direction DIRECTION = Servo.Direction.FORWARD;
+    public static String str = "Caw Servo";
 
     @Override
     public void init() {
@@ -32,8 +32,7 @@ public class HardwareServo extends OpMode {
 
     @Override
     public void loop() {
-        if (reverse == 0) this.servo.setDirection(Servo.Direction.FORWARD);
-        else if (reverse == 1) this.servo.setDirection(Servo.Direction.REVERSE);
+        this.servo.setDirection(DIRECTION);
 
         this.servo.setPosition(pos);
 

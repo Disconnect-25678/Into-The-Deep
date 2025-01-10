@@ -24,13 +24,17 @@ public class EndEffector extends SubsystemBase {
 
     public static WristTwistAngles ANGLES_INTAKE_GROUND = new WristTwistAngles(0, 0);
     public static WristTwistAngles ANGLES_INTAKE_REAR = new WristTwistAngles(0, 0);
+    public static WristTwistAngles ANGLES_BUCKET = new WristTwistAngles(0, 0);
     public static WristTwistAngles ANGLES_SUB = new WristTwistAngles(0, 0);
     public static WristTwistAngles ANGLES_STOW = new WristTwistAngles(0, 0);
 
     public static double ARM_INTAKE_GROUND = 0;
     public static double ARM_INTAKE_REAR = 0.2;
+    public static double ARM_BUCKET = 0.2;
     public static double ARM_SUB = 0.3;
     public static double ARM_STOW = 0.1;
+
+    public static long TIME_GRAB_SPECIMEN = 500;
 
 
     private Servo armLeftServo,
@@ -57,7 +61,7 @@ public class EndEffector extends SubsystemBase {
     }
 
     public void setAngles(WristTwistAngles angles) {
-        double avg = angles.wristAngle / (maxWristAngle - minWristAngle) * (maxServoPos - minServoPos) + minServoPos;
+        double avg = (angles.wristAngle - minWristAngle) / (maxWristAngle - minWristAngle) * (maxServoPos - minServoPos) + minServoPos;
         double diff = angles.twistAngle / maxTwistAngle * ((maxServoPos - minServoPos) / 2);
 
         this.wristTwistAnglesTarget = angles;
@@ -91,6 +95,11 @@ public class EndEffector extends SubsystemBase {
     public void setSubScorePosition() {
         this.setAngles(ANGLES_SUB);
         this.setArmPosition(ARM_SUB);
+    }
+
+    public void setBucketPosition() {
+        this.setAngles(ANGLES_BUCKET);
+        this.setArmPosition(ARM_BUCKET);
     }
 
     public void setSubScorePositionAlt() {
@@ -127,12 +136,12 @@ public class EndEffector extends SubsystemBase {
     public void periodic() {
         this.telemetry.addLine("---EndEffector-------------------------------------------");
 
-        this.telemetry.addData("Wrist Target Angle: ", this.wristTwistAnglesTarget.wristAngle);
-        this.telemetry.addData("Twist Target Angle: ", this.wristTwistAnglesTarget.twistAngle);
+        this.telemetry.addData("ee-Wrist Target Angle: ", this.wristTwistAnglesTarget.wristAngle);
+        this.telemetry.addData("ee-Twist Target Angle: ", this.wristTwistAnglesTarget.twistAngle);
 
-        this.telemetry.addData("Wrist Left Pos: ", this.wristLeftServo.getPosition());
+        this.telemetry.addData("ee-Wrist Left Pos: ", this.wristLeftServo.getPosition());
 
-        this.telemetry.addData("Toggle counter: ", this.toggleCounter);
+        this.telemetry.addData("ee-Toggle counter: ", this.toggleCounter);
 
     }
 
