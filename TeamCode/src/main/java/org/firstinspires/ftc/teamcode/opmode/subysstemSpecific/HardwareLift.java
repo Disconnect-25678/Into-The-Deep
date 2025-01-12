@@ -19,6 +19,7 @@ public class HardwareLift extends OpMode {
     @Override
     public void init() {
         this.telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), this.telemetry);
+        RobotHardware.getInstance().initializeLift(hardwareMap);
         lift = new Lift(RobotHardware.getInstance().leftLiftMotor,
                 RobotHardware.getInstance().rightLiftMotor,
                 telemetry);
@@ -28,5 +29,10 @@ public class HardwareLift extends OpMode {
     public void loop() {
         lift.setTarget(target);
         lift.periodic();
+    }
+
+    @Override
+    public void stop() {
+        RobotHardware.getInstance().kill();
     }
 }

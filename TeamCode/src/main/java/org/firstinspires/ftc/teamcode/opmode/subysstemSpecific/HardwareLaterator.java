@@ -20,6 +20,7 @@ public class HardwareLaterator extends OpMode {
     @Override
     public void init() {
         this.telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), this.telemetry);
+        RobotHardware.getInstance().initializeLaterator(hardwareMap);
         laterator = new Laterator(RobotHardware.getInstance().lateratorMotor, telemetry);
     }
 
@@ -27,5 +28,10 @@ public class HardwareLaterator extends OpMode {
     public void loop() {
         laterator.setTarget(target);
         laterator.periodic();
+    }
+
+    @Override
+    public void stop() {
+        RobotHardware.getInstance().kill();
     }
 }

@@ -14,11 +14,12 @@ import org.firstinspires.ftc.teamcode.subsystem.EndEffector;
 public class HardwareEndEffector extends OpMode {
     private EndEffector effector;
 
-    public static EndEffector.WristTwistAngles wtAngles = new EndEffector.WristTwistAngles(0, 0);
+    public static EndEffector.WristTwistAngles wtAngles = new EndEffector.WristTwistAngles(0.4, 0.05);
 
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
+        RobotHardware.getInstance().initializeEndEffector(hardwareMap);
         effector = new EndEffector(RobotHardware.getInstance().armLeft,
                 RobotHardware.getInstance().armRight,
                 RobotHardware.getInstance().wristLeft,
@@ -31,5 +32,10 @@ public class HardwareEndEffector extends OpMode {
     public void loop() {
         effector.setAngles(wtAngles);
         effector.periodic();
+    }
+
+    @Override
+    public void stop() {
+        RobotHardware.getInstance().kill();
     }
 }

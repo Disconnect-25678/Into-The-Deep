@@ -34,7 +34,7 @@ public class DrivetrainOp extends CommandOpModeEx {
         );
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> usingHeadingPID = !usingHeadingPID)
+                new InstantCommand(() -> toggleHeadingPID())
         );
 
         schedule(new RunCommand(telemetry::update));
@@ -50,5 +50,9 @@ public class DrivetrainOp extends CommandOpModeEx {
 
         telemetry.addData("Using HeadingPID: ", usingHeadingPID);
         this.timer.updateLoop();
+    }
+
+    private void toggleHeadingPID() {
+        this.usingHeadingPID = !usingHeadingPID;
     }
 }

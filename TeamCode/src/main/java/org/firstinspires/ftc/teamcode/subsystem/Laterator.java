@@ -13,16 +13,20 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 public class Laterator extends SubsystemBase {
     public static int MIN = 0;
-    public static int MAX = 3000;
+    public static int MAX = 720;
     public static int TICK_PER_REQ = 250;
-    public static double RESET_SPEED = -0.3;
+    public static double RESET_SPEED = -0.4;
 
-    public static int POS_SUB = 30;
+    public static int POS_SUB = 570;
     public static int POS_REAR_INTAKE = 0;
     public static int POS_BUCKET = 0;
 
+    public static double maxPower = 0.4;
+
+    public static double TOLERANCE = 30;
+
     public static double
-        kP = 0.025,
+        kP = 0.03,
         kI = 0,
         kD = 0.0004;
 
@@ -56,6 +60,10 @@ public class Laterator extends SubsystemBase {
 
     public int getTargetPosition(){
         return this.target;
+    }
+
+    public boolean isAtTarget() {
+        return Math.abs(this.getCurrentPosition() - this.getTargetPosition()) <= TOLERANCE;
     }
 
     public void doResetMovement(){
@@ -122,6 +130,7 @@ public class Laterator extends SubsystemBase {
     }
 
     private void setPower(double power){
+        power = MathUtils.clamp(power, -maxPower, maxPower);
         this.leftMotor.setPower(power);
         this.telemetry.addData("Laterator power: ", power);
     }
@@ -142,6 +151,7 @@ public class Laterator extends SubsystemBase {
 
         telemetry.addData("laterator-triggerMoving?: ", triggerMoving);
         this.telemetry.addData("laterator-target: ", this.target);
+        telemetry.addData("laterator-at target: ", this.isAtTarget());
     }
 
 }

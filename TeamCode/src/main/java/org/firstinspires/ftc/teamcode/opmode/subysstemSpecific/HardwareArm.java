@@ -19,6 +19,8 @@ public class HardwareArm extends OpMode {
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
+        RobotHardware.getInstance().initializeEndEffector(hardwareMap);
+
         effector = new EndEffector(RobotHardware.getInstance().armLeft,
                 RobotHardware.getInstance().armRight,
                 RobotHardware.getInstance().wristLeft,
@@ -31,5 +33,10 @@ public class HardwareArm extends OpMode {
     public void loop() {
         effector.setArmPosition(target);
         effector.periodic();
+    }
+
+    @Override
+    public void stop() {
+        RobotHardware.getInstance().kill();
     }
 }

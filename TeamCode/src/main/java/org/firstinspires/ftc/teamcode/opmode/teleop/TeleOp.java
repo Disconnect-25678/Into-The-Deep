@@ -61,7 +61,7 @@ public class TeleOp extends CommandOpModeEx {
 
         setCancel(false);
 
-        gamepad.getGamepadButton(GamepadKeys.Button.Y).whenPressed(
+        gamepad.getGamepadButton(GamepadKeys.Button.START).whenPressed(
                 new InstantCommand(dt::resetYaw, dt)
         );
 
@@ -69,13 +69,13 @@ public class TeleOp extends CommandOpModeEx {
                 new InstantCommand(() -> usingHeadingPID = !usingHeadingPID)
         );
 
-        gamepad.getGamepadButton(GamepadKeys.Button.START).whileHeld(
+        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(
                 new RunCommand(lift::doResetMovement, lift)
         ).whenReleased(
                 new InstantCommand(lift::reset, lift)
         );
 
-        gamepad.getGamepadButton(GamepadKeys.Button.BACK).whileHeld(
+        gamepad.getGamepadButton(GamepadKeys.Button.DPAD_LEFT).whileHeld(
                 new RunCommand(laterator::doResetMovement, laterator)
         ).whenReleased(
                 new InstantCommand(laterator::reset, laterator)
@@ -101,26 +101,36 @@ public class TeleOp extends CommandOpModeEx {
 //        );
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> {
-                    setCancel(false);
-                    lift.setRearIntakePosition();
-                    laterator.setRearIntakePosition();
-                    effector.setRearIntakePosition();
-                    effector.release();
-                }, lift, laterator, effector)
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> setCancel(false)),
+                        new FunctionalCommand(
+                                () -> laterator.setRearIntakePosition(),
+                                () -> {},
+                                (interrupted) -> {},
+                                () -> laterator.isAtTarget(),
+                                laterator
+                        ),
+                        new InstantCommand(effector::setRearIntakePositionArm, effector),
+                        new WaitCommand(EndEffector.TIME_ARM_PASSOVER),
+                        new InstantCommand(effector::setRearIntakePositionWrist, effector)
+                )
         );
 
         new Trigger(
                 () -> !gamepad1.right_bumper && !cancel
         ).whenActive(
                 new SequentialCommandGroup(
-                        new InstantCommand(effector::grab, effector),
-                        new WaitCommand(EndEffector.TIME_GRAB_SPECIMEN),
-                        new InstantCommand(() -> {
-                            lift.setStow();
-                            laterator.stow();
-                            effector.setStow();
-                        })
+                        new FunctionalCommand(
+                                () -> laterator.stow(),
+                                () -> {},
+                                (interrupted) -> {},
+                                () -> laterator.isAtTarget(),
+                                laterator
+                        ),
+                        new InstantCommand(effector::setStowWrist),
+                        new WaitCommand(EndEffector.TIME_WAIT_STWIST),
+                        new InstantCommand(effector::setStowArm, effector),
+                        new WaitCommand(EndEffector.TIME_ARM_PASSOVER)
                 )
         );
 
@@ -149,12 +159,12 @@ public class TeleOp extends CommandOpModeEx {
         new Trigger(
                 () -> gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > DEAD_BAND
         ).whenActive(
-                new InstantCommand(() -> {
-                    setCancel(false);
-                    lift.setGroundIntakePosition();
-                    effector.setGroundIntakePosition();
-                    effector.release();
-                }, lift, effector)
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> dt.setSlowDrive(true), dt),
+                        new InstantCommand(() -> setCancel(false)),
+                        new InstantCommand(lift::setGroundIntakePosition, lift),
+                        new InstantCommand(effector::setGroundIntakeMid, effector)
+                )
         );
 
         new Trigger(
@@ -167,13 +177,18 @@ public class TeleOp extends CommandOpModeEx {
                 () -> !cancel && !(gamepad1.right_trigger > DEAD_BAND)
         ).whenActive(
                 new SequentialCommandGroup(
-                        new InstantCommand(effector::grab, effector),
-                        new WaitCommand(EndEffector.TIME_GRAB_SPECIMEN),
-                        new InstantCommand(() -> {
-                            effector.setStow();
-                            lift.setStow();
-                            laterator.stow();
-                        })
+                        new InstantCommand(() -> dt.setSlowDrive(false), dt),
+                        new InstantCommand(effector::resetToggleAngle, effector),
+                        new InstantCommand(effector::setGroundIntakeMid, effector),
+                        new WaitCommand(EndEffector.TIME_LIFT_OFF_GROUND_SUB),
+                        new FunctionalCommand(
+                                () -> laterator.stow(),
+                                () -> {},
+                                (interrupted) -> {},
+                                () -> laterator.isAtTarget(),
+                                laterator
+                        ),
+                        new InstantCommand(effector::setStow, effector)
                 )
         );
 
@@ -197,26 +212,40 @@ public class TeleOp extends CommandOpModeEx {
 //        );
 
         gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-                new InstantCommand(() -> {
-                    setCancel(false);
-                    lift.setHighBucketLevel();
-                    laterator.setBucketScorePosition();
-                    effector.setBucketPosition();
-                    effector.release();
-                }, lift, laterator, effector)
+//                new InstantCommand(() -> {
+//                    setCancel(false);
+//                    lift.setLowBucketLevel();
+//                    laterator.setBucketScorePosition();
+//                    effector.setBucketPosition();
+//                    effector.release();
+//                }, lift, laterator, effector)
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> setCancel(false)),
+                        new InstantCommand(lift::setLowBucketLevel, lift),
+                        new FunctionalCommand(
+                                () -> laterator.setBucketScorePosition(),
+                                () -> {},
+                                (interrupted) -> {},
+                                () -> laterator.isAtTarget(),
+                                laterator
+                        ),
+                        new InstantCommand(effector::setBucketPositionArm, effector),
+                        new WaitCommand(EndEffector.TIME_ARM_PASSOVER),
+                        new InstantCommand(effector::setBucketPositionWrist, effector)
+
+                )
         );
 
         new Trigger(
                 () -> !cancel && !gamepad1.left_bumper
         ).whenActive(
                 new SequentialCommandGroup(
-                        new InstantCommand(effector::grab, effector),
-                        new WaitCommand(EndEffector.TIME_GRAB_SPECIMEN),
-                        new InstantCommand(() -> {
-                            lift.setStow();
-                            laterator.stow();
-                            effector.setStow();
-                        })
+
+                        new InstantCommand(lift::setStow, lift),
+                        new InstantCommand(effector::setStowWrist, effector),
+                        new WaitCommand(EndEffector.TIME_WAIT_STWIST),
+                        new InstantCommand(effector::setStowArm),
+                        new WaitCommand(EndEffector.TIME_ARM_PASSOVER)
                 )
         );
 
@@ -249,15 +278,23 @@ public class TeleOp extends CommandOpModeEx {
 //        );
 
         new Trigger(
-                () -> gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2
+                () -> gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > DEAD_BAND
         ).whenActive(
-                new InstantCommand(() -> {
-                    setCancel(false);
-                    effector.grab();
-                    lift.setHighSubLevel();
-                    laterator.setSubScorePosition();
-                    effector.setSubScorePosition();
-                }, lift, effector)
+                new SequentialCommandGroup(
+                        new FunctionalCommand(
+                                () -> lift.setHighSubLevel(),
+                                () -> {},
+                                (interrupted) -> {},
+                                () -> lift.isAtTarget(),
+                                lift
+                        ),
+                    new InstantCommand(() -> {
+                        setCancel(false);
+                        laterator.setSubScorePosition();
+                        effector.setSubScorePosition();
+                    }, lift, effector)
+
+                )
         );
 
         new Trigger(
@@ -265,47 +302,105 @@ public class TeleOp extends CommandOpModeEx {
         ).whenActive(
                 new SequentialCommandGroup(
                         new FunctionalCommand(
-                                () -> lift.setPostScorePosition(),
+                                () -> laterator.stow(),
                                 () -> {},
                                 (interrupted) -> {},
-                                () -> lift.isAtTarget(),
+                                () -> laterator.isAtTarget(),
                                 lift
                         ),
-                        new InstantCommand(effector::release),
-                        new WaitCommand(EndEffector.TIME_GRAB_SPECIMEN),
                         new InstantCommand(() -> {
                             effector.setStow();
                             lift.setStow();
-                            laterator.stow();
-                        })
+                        }, effector, lift)
                 )
         );
 
         new Trigger(
-                () -> !cancel && gamepad1.a && gamepad1.right_trigger > DEAD_BAND
+                () -> !cancel && gamepad1.x && gamepad1.right_bumper
+        ).whenActive(
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> setCancel(true)),
+                        new InstantCommand(lift::setStow, lift),
+                        new FunctionalCommand(
+                                () -> laterator.stow(),
+                                () -> {},
+                                (interrupted) -> {},
+                                () -> laterator.isAtTarget(),
+                                laterator
+                        ),
+                        new InstantCommand(effector::setStowArm, effector),
+                        new WaitCommand(EndEffector.TIME_ARM_PASSOVER),
+                        new InstantCommand(effector::setStowWrist, effector)
+                )
+        );
+
+        new Trigger(
+                () -> !cancel && gamepad1.y && gamepad1.right_trigger > DEAD_BAND
         ).whenActive(
                 new InstantCommand(effector::toggleTwistRotation, effector)
         );
 
         new Trigger(
-                () -> !cancel && gamepad1.a && gamepad1.left_trigger > DEAD_BAND
-        ).whenActive(
-                new InstantCommand(lift::setLowSubLevel, lift)
+                () -> !cancel && gamepad1.x && gamepad1.right_trigger > DEAD_BAND
+        ).toggleWhenActive(
+                new InstantCommand(effector::setGroundIntakePosition, effector),
+                new InstantCommand(effector::setGroundIntakeMidArm, effector)
         );
 
         new Trigger(
-                () -> !cancel && gamepad1.a && gamepad1.left_bumper
+                () -> !cancel && gamepad1.x && gamepad1.left_trigger > DEAD_BAND
         ).whenActive(
-                new InstantCommand(lift::setLowBucketLevel, lift)
+                new InstantCommand(lift::setPostScorePosition, lift)
         );
 
+        new Trigger(
+                () -> !cancel && gamepad1.dpad_up && gamepad1.left_trigger > DEAD_BAND
+        ).whenActive(
+                new InstantCommand(lift::setHighSubAlt, lift)
+        );
+
+//        new Trigger(
+//                () -> !cancel && gamepad1.a && gamepad1.left_bumper
+//        ).whenActive(
+//                new InstantCommand(lift::setLowBucketLevel, lift)
+//        );
+
+        new Trigger(
+                () -> !cancel && gamepad1.y && gamepad1.left_trigger > DEAD_BAND
+        ).toggleWhenActive(
+                new InstantCommand(effector::setPostScorePosition, effector),
+                new InstantCommand(effector::setSubScorePosition, effector)
+        );
+
+
+//
+//        new Trigger(
+//                () -> !cancel && gamepad1.x && gamepad1.left_bumper
+//        ).whenActive(
+//                new InstantCommand(lift::setHighBucketLevel, lift)
+//        );
+
+
         gamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(
-                new InstantCommand(() -> {
-                    setCancel(true);
-                    lift.setStow();
-                    laterator.stow();
-                    effector.setStow();
-                })
+                new SequentialCommandGroup(
+                        new InstantCommand(() -> setCancel(true)),
+                        new InstantCommand(() -> dt.setSlowDrive(false), dt),
+                        new InstantCommand(lift::setStow, lift),
+                        new FunctionalCommand(
+                                () -> laterator.stow(),
+                                () -> {},
+                                (interrupted) -> {},
+                                () -> laterator.isAtTarget(),
+                                laterator
+                        ),
+                        new InstantCommand(effector::setStowArm, effector),
+                        new WaitCommand(EndEffector.TIME_ARM_PASSOVER),
+                        new InstantCommand(effector::setStowWrist, effector)
+                )
+        );
+
+        gamepad.getGamepadButton(GamepadKeys.Button.A).whenPressed(
+                new InstantCommand(effector::toggleClaw, effector)
         );
     }
 

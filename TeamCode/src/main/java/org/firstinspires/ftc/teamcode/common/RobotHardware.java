@@ -25,11 +25,11 @@ public class RobotHardware {
 
     private RobotHardware(){}
 
-    /**
-     * Initializes all hardware on the robot (This includes EVERYTHING)
-     * @param HardwareMap hardwareMap
-     * @return this object with hardware initialized for convenience instead of calling the method after creating the object
-     */
+//    /**
+//     * Initializes all hardware on the robot (This includes EVERYTHING)
+//     * @param HardwareMap hardwareMap
+//     * @return this object with hardware initialized for convenience instead of calling the method after creating the object
+//     */
     public RobotHardware initialize(HardwareMap hardwareMap) {
         this.initializeDrivetrain(hardwareMap);
         this.initializeLift(hardwareMap);
@@ -48,10 +48,10 @@ public class RobotHardware {
         for (int i = 0; i < driveMotors.length; i++) {
             driveMotors[i].setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             driveMotors[i].setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            if (i < 2) {
-                driveMotors[i].setDirection(DcMotorSimple.Direction.FORWARD);
-            } else {
+            if (i == 2 || i == 0) {
                 driveMotors[i].setDirection(DcMotorSimple.Direction.REVERSE);
+            } else {
+                driveMotors[i].setDirection(DcMotorSimple.Direction.FORWARD);
             }
         }
 
@@ -103,7 +103,7 @@ public class RobotHardware {
         this.wristRight = hardwareMap.get(Servo.class, "Wrist Right");
 
         this.wristLeft.setDirection(Servo.Direction.FORWARD);
-        this.wristRight.setDirection(Servo.Direction.REVERSE);
+        this.wristRight.setDirection(Servo.Direction.FORWARD);
 
         this.clawServo = hardwareMap.get(Servo.class, "Claw Servo");
         this.clawServo.setDirection(Servo.Direction.FORWARD);
@@ -111,12 +111,12 @@ public class RobotHardware {
         return this;
     }
 
-    public void kill() {
+    public static void kill() {
         instance = null;
     }
 
     public static RobotHardware getInstance() {
-        if (instance != null) instance = new RobotHardware();
+        if (instance == null) instance = new RobotHardware();
         return instance;
     }
 }

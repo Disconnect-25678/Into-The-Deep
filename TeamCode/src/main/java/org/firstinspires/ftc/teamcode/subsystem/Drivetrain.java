@@ -15,7 +15,11 @@ import org.firstinspires.ftc.teamcode.common.util.MotorWrapper;
 @Config
 public class Drivetrain extends SubsystemBase {
     public static double DRIVETRAIN_MAX_ROTATION = 0.75;
+    public static double DRIVETRAIN_SLOW_ROTATION = 0.3;
+    public static double DRIVETRAIN_SLOW_DRIVE_POWER = 0.5;
     public static double DRIVETRAIN_MAX_DRIVE_POWER = 1;
+
+    private boolean isSlowDrive = false;
 
     public static double kP = 0;
     public static double kI = 0;
@@ -52,7 +56,12 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void drive(Vector2d driveStickVector, double rotation) {
-        double[] vals = Algorithms.returnMecanumValues(driveStickVector.rotateBy(-this.getYaw()), rotation * DRIVETRAIN_MAX_ROTATION, DRIVETRAIN_MAX_DRIVE_POWER);
+        double[] vals;
+        if (isSlowDrive) {
+            vals = Algorithms.returnMecanumValues(driveStickVector.rotateBy(-this.getYaw()), rotation * DRIVETRAIN_SLOW_ROTATION, DRIVETRAIN_SLOW_DRIVE_POWER);
+
+        }
+        else vals = Algorithms.returnMecanumValues(driveStickVector.rotateBy(-this.getYaw()), rotation * DRIVETRAIN_MAX_ROTATION, DRIVETRAIN_MAX_DRIVE_POWER);
         for (int i = 0; i < vals.length; i++) {
             this.motors[i].setPower(vals[i]);
         }
@@ -96,6 +105,10 @@ public class Drivetrain extends SubsystemBase {
     public void resetYaw() {
         this.imu.resetYaw();
         this.targetHeadingDegrees = 0;
+    }
+
+    public void setSlowDrive(boolean slowDrive) {
+        this.isSlowDrive = slowDrive;
     }
 
     @Override

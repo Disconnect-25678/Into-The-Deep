@@ -13,27 +13,31 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 @Config
 public class Lift extends SubsystemBase {
     public static int GROUND_POSITION = 0;
-    public static int MAX = 3000;
+    public static int MAX = 1460;
     public static int TICK_PER_REQ = 250;
     public static double RESET_SPEED = -0.3;
     public static int TOLERANCE = 30;
 
     public static int POS_STOW = 0;
-    public static int POS_INTAKE_GROUND = 200;
-    public static int POS_INTAKE_REAR = 200;
-    public static int POS_SUB_LOW = 400;
-    public static int POS_SUB_HIGH = 500;
-    public static int POS_BUCKET_LOW = 600;
-    public static int POS_BUCKET_HIGH = 700;
+    public static int POS_INTAKE_GROUND = 0;
+    public static int POS_INTAKE_REAR = 0;
+    public static int POS_SUB_LOW = 200;
+    public static int POS_SUB_HIGH = 910;
+    public static int POS_BUCKET_LOW = 1460;
+    public static int POS_BUCKET_HIGH = 1460;
 
-    public static int SCORE_DELTA = 100;
+    public static int SCORE_DELTA = -100;
+
+    public static int POS_SUB_HIGH_ALT = 940;
+
+    public static double MAX_POWER = 0.5;
 
     public static double
         kP = 0.025,
         kI = 0,
         kD = 0.0004;
 
-    public static double kF = 0;
+    public static double kF = 0.075;
 
     private final DcMotorEx leftMotor;
     private final DcMotorEx rightMotor;
@@ -145,7 +149,12 @@ public class Lift extends SubsystemBase {
         this.setTarget(this.getTargetPosition() + SCORE_DELTA);
     }
 
+    public void setHighSubAlt() {
+        this.setTarget(POS_SUB_HIGH_ALT);
+    }
+
     private void setPower(double power){
+        power = MathUtils.clamp(power, -MAX_POWER, MAX_POWER);
         this.leftMotor.setPower(power);
         this.rightMotor.setPower(power);
         this.telemetry.addData("lift power: ", power);
@@ -167,6 +176,7 @@ public class Lift extends SubsystemBase {
 
         telemetry.addData("lift-triggerMoving?: ", triggerMoving);
         this.telemetry.addData("lift-target: ", this.target);
+        telemetry.addData("lift-at target: ", this.isAtTarget());
     }
 
 }

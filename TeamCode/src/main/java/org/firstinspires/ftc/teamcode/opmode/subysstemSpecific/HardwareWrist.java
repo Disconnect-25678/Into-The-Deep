@@ -14,12 +14,14 @@ import org.firstinspires.ftc.teamcode.subsystem.EndEffector;
 public class HardwareWrist extends OpMode {
     private EndEffector effector;
 
-    public static int leftPosition = 0;
-    public static int rightPosition = 0;
+    public static double leftPosition = 0;
+    public static double rightPosition = 0;
 
     @Override
     public void init() {
         this.telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
+        RobotHardware.getInstance().initializeEndEffector(hardwareMap);
+
         effector = new EndEffector(RobotHardware.getInstance().armLeft,
                 RobotHardware.getInstance().armRight,
                 RobotHardware.getInstance().wristLeft,
@@ -34,5 +36,10 @@ public class HardwareWrist extends OpMode {
     public void loop() {
         effector.setServoPositions(leftPosition, rightPosition);
         effector.periodic();
+    }
+
+    @Override
+    public void stop() {
+        RobotHardware.getInstance().kill();
     }
 }
