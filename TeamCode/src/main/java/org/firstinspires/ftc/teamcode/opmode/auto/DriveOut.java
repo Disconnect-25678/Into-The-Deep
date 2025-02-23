@@ -18,7 +18,10 @@ public class DriveOut extends OpMode {
 
     private ElapsedTime elapsedTime;
 
-    public static double secondsDrive = 5;
+    public static double secondsDrive = 1.3;
+    public static double drivePowerX = -0.3;
+    public static double drivePowerY = 0;
+
     @Override
     public void init() {
         telemetry = new MultipleTelemetry(FtcDashboard.getInstance().getTelemetry(), telemetry);
@@ -37,7 +40,7 @@ public class DriveOut extends OpMode {
     @Override
     public void loop() {
         if (elapsedTime.time() < secondsDrive) {
-            drivetrain.drive(Algorithms.mapJoystick(0, 0.3), 0);
+            drivetrain.drive(Algorithms.mapJoystick(drivePowerX, drivePowerY), 0);
         }
         else {
             drivetrain.drive(Algorithms.mapJoystick(0, 0), 0);

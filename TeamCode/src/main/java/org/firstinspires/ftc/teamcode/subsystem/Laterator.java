@@ -15,13 +15,14 @@ public class Laterator extends SubsystemBase {
     public static int MIN = 0;
     public static int MAX = 720;
     public static int TICK_PER_REQ = 250;
-    public static double RESET_SPEED = -0.4;
+    public static double RESET_SPEED = -0.5;
 
-    public static int POS_SUB = 570;
+    public static int POS_SUB = 500;
     public static int POS_REAR_INTAKE = 0;
     public static int POS_BUCKET = 0;
+    public static int POS_SUB_SCORE_THRESHOLD = 350;
 
-    public static double maxPower = 0.4;
+    public static double maxPower = 0.5;
 
     public static double TOLERANCE = 30;
 
@@ -64,6 +65,10 @@ public class Laterator extends SubsystemBase {
 
     public boolean isAtTarget() {
         return Math.abs(this.getCurrentPosition() - this.getTargetPosition()) <= TOLERANCE;
+    }
+
+    public boolean atSubScoreThreshold() {
+        return this.getCurrentPosition() > POS_SUB_SCORE_THRESHOLD;
     }
 
     public void doResetMovement(){

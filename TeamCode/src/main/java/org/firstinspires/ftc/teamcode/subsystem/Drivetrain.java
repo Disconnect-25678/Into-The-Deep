@@ -68,14 +68,13 @@ public class Drivetrain extends SubsystemBase {
     }
 
     public void driveFacingAngle(Vector2d driveStickVector, double rotation) {
-        if (Double.compare(0, rotation) != 0) {
+        if (!inLeftOverRotation && Double.compare(0, rotation) != 0) {
             drive(driveStickVector, rotation);
             this.inLeftOverRotation = true;
             return;
         } else if (inLeftOverRotation) {
             drive(driveStickVector, 0);
-            this.rotationRate = imu.getRobotAngularVelocity(AngleUnit.DEGREES).yRotationRate;
-            if (this.rotationRate < DRIVETRAIN_OMEGA_THRESHOLD) {
+            if (this.getRotationRateDegrees() < DRIVETRAIN_OMEGA_THRESHOLD) {
                 this.inLeftOverRotation = false;
                 this.targetHeadingDegrees = this.getYaw();
             }
@@ -111,9 +110,14 @@ public class Drivetrain extends SubsystemBase {
         this.isSlowDrive = slowDrive;
     }
 
+    public double getRotationRateDegrees() {
+        return this.rotationRate;
+    }
+
     @Override
     public void periodic(){
         this.yaw = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
+        this.rotationRate = imu.getRobotAngularVelocity(AngleUnit.DEGREES).yRotationRate;
 
         telemetry.addLine("\nDT------------");
         telemetry.addData("dt-Heading/Yaw: ", this.yaw);

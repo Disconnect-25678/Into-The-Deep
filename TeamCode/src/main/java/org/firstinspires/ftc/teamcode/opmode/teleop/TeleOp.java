@@ -28,7 +28,8 @@ public class TeleOp extends CommandOpModeEx {
     private Laterator laterator;
     private EndEffector effector;
 
-    private boolean usingHeadingPID = true;
+    private boolean usingHeadingPID = false;
+    private boolean isIntakingGround = false;
 
     private boolean cancel;
 
@@ -65,9 +66,9 @@ public class TeleOp extends CommandOpModeEx {
                 new InstantCommand(dt::resetYaw, dt)
         );
 
-        gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-                new InstantCommand(() -> usingHeadingPID = !usingHeadingPID)
-        );
+//        gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
+//                new InstantCommand(() -> usingHeadingPID = !usingHeadingPID)
+//        );
 
         gamepad.getGamepadButton(GamepadKeys.Button.DPAD_DOWN).whileHeld(
                 new RunCommand(lift::doResetMovement, lift)
@@ -80,25 +81,6 @@ public class TeleOp extends CommandOpModeEx {
         ).whenReleased(
                 new InstantCommand(laterator::reset, laterator)
         );
-
-//        gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
-//                new InstantCommand(() -> {
-//                    lift.setRearIntakePosition();
-//                    laterator.setRearIntakePosition();
-//                    effector.setRearIntakePosition();
-//                    effector.release();
-//                }, lift, laterator, effector)
-//        ).whenReleased(
-//                new SequentialCommandGroup(
-//                        new InstantCommand(effector::grab, effector),
-//                        new WaitCommand(EndEffector.TIME_GRAB_SPECIMEN),
-//                        new InstantCommand(() -> {
-//                            lift.setStow();
-//                            laterator.stow();
-//                            effector.setStow();
-//                        })
-//                )
-//        );
 
         gamepad.getGamepadButton(GamepadKeys.Button.RIGHT_BUMPER).whenPressed(
                 new SequentialCommandGroup(
@@ -134,28 +116,6 @@ public class TeleOp extends CommandOpModeEx {
                 )
         );
 
-//        new Trigger(
-//                () -> gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0.2
-//        ).whenActive(
-//                new InstantCommand(() -> {
-//                    lift.setGroundIntakePosition();
-//                    effector.setGroundIntakePosition();
-//                    effector.release();
-//                }, lift, effector)
-//        ).whileActiveContinuous(
-//                new RunCommand(() -> laterator.setScaleTarget(gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)))
-//        ).whenInactive(
-//                new SequentialCommandGroup(
-//                        new InstantCommand(effector::grab, effector),
-//                        new WaitCommand(EndEffector.TIME_GRAB_SPECIMEN),
-//                        new InstantCommand(() -> {
-//                            effector.setStow();
-//                            lift.setStow();
-//                            laterator.stow();
-//                        })
-//                )
-//        );
-
         new Trigger(
                 () -> gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > DEAD_BAND
         ).whenActive(
@@ -178,6 +138,7 @@ public class TeleOp extends CommandOpModeEx {
         ).whenActive(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> dt.setSlowDrive(false), dt),
+                        new InstantCommand(() -> setIntakingGround(false)),
                         new InstantCommand(effector::resetToggleAngle, effector),
                         new InstantCommand(effector::setGroundIntakeMid, effector),
                         new WaitCommand(EndEffector.TIME_LIFT_OFF_GROUND_SUB),
@@ -191,25 +152,6 @@ public class TeleOp extends CommandOpModeEx {
                         new InstantCommand(effector::setStow, effector)
                 )
         );
-
-//        gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
-//                new InstantCommand(() -> {
-//                    lift.setHighBucketLevel();
-//                    laterator.setBucketScorePosition();
-//                    effector.setBucketPosition();
-//                    effector.release();
-//                }, lift, laterator, effector)
-//        ).whenReleased(
-//                new SequentialCommandGroup(
-//                        new InstantCommand(effector::grab, effector),
-//                        new WaitCommand(EndEffector.TIME_GRAB_SPECIMEN),
-//                        new InstantCommand(() -> {
-//                            lift.setStow();
-//                            laterator.stow();
-//                            effector.setStow();
-//                        })
-//                )
-//        );
 
         gamepad.getGamepadButton(GamepadKeys.Button.LEFT_BUMPER).whenPressed(
 //                new InstantCommand(() -> {
@@ -249,38 +191,11 @@ public class TeleOp extends CommandOpModeEx {
                 )
         );
 
-//        new Trigger(
-//                () -> gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0.2
-//        ).whenActive(
-//                new InstantCommand(() -> {
-//                    effector.grab();
-//                    lift.setHighSubLevel();
-//                    laterator.setSubScorePosition();
-//                    effector.setSubScorePosition();
-//                }, lift, effector)
-//        ).whenInactive(
-//                new SequentialCommandGroup(
-//                        new FunctionalCommand(
-//                                () -> lift.setPostScorePosition(),
-//                                () -> {},
-//                                (interrupted) -> {},
-//                                () -> lift.isAtTarget(),
-//                                lift
-//                        ),
-//                        new InstantCommand(effector::release),
-//                        new WaitCommand(EndEffector.TIME_GRAB_SPECIMEN),
-//                        new InstantCommand(() -> {
-//                            effector.setStow();
-//                            lift.setStow();
-//                            laterator.stow();
-//                        })
-//                )
-//        );
-
         new Trigger(
                 () -> gamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > DEAD_BAND
         ).whenActive(
                 new SequentialCommandGroup(
+                        new InstantCommand(() -> dt.setSlowDrive(true), dt),
                         new FunctionalCommand(
                                 () -> lift.setHighSubLevel(),
                                 () -> {},
@@ -301,12 +216,13 @@ public class TeleOp extends CommandOpModeEx {
                 () -> !cancel && !(gamepad1.left_trigger > DEAD_BAND)
         ).whenActive(
                 new SequentialCommandGroup(
+                        new InstantCommand(() -> dt.setSlowDrive(false), dt),
                         new FunctionalCommand(
                                 () -> laterator.stow(),
                                 () -> {},
                                 (interrupted) -> {},
                                 () -> laterator.isAtTarget(),
-                                lift
+                                laterator
                         ),
                         new InstantCommand(() -> {
                             effector.setStow();
@@ -343,8 +259,15 @@ public class TeleOp extends CommandOpModeEx {
         new Trigger(
                 () -> !cancel && gamepad1.x && gamepad1.right_trigger > DEAD_BAND
         ).toggleWhenActive(
-                new InstantCommand(effector::setGroundIntakePosition, effector),
+                new InstantCommand(this::setGroundIntakePosition, effector),
                 new InstantCommand(effector::setGroundIntakeMidArm, effector)
+        );
+
+        new Trigger(
+                () -> !cancel && gamepad1.y && gamepad1.right_trigger > DEAD_BAND
+        ).toggleWhenActive(
+                new InstantCommand(effector::setGroundIntakeRotated, effector),
+                new InstantCommand(effector::setGroundIntakeWrist, effector)
         );
 
         new Trigger(
@@ -359,12 +282,6 @@ public class TeleOp extends CommandOpModeEx {
                 new InstantCommand(lift::setHighSubAlt, lift)
         );
 
-//        new Trigger(
-//                () -> !cancel && gamepad1.a && gamepad1.left_bumper
-//        ).whenActive(
-//                new InstantCommand(lift::setLowBucketLevel, lift)
-//        );
-
         new Trigger(
                 () -> !cancel && gamepad1.y && gamepad1.left_trigger > DEAD_BAND
         ).toggleWhenActive(
@@ -373,17 +290,11 @@ public class TeleOp extends CommandOpModeEx {
         );
 
 
-//
-//        new Trigger(
-//                () -> !cancel && gamepad1.x && gamepad1.left_bumper
-//        ).whenActive(
-//                new InstantCommand(lift::setHighBucketLevel, lift)
-//        );
-
 
         gamepad.getGamepadButton(GamepadKeys.Button.B).whenPressed(
                 new SequentialCommandGroup(
                         new InstantCommand(() -> setCancel(true)),
+                        new InstantCommand(() -> setIntakingGround(false)),
                         new InstantCommand(() -> dt.setSlowDrive(false), dt),
                         new InstantCommand(lift::setStow, lift),
                         new FunctionalCommand(
@@ -414,9 +325,23 @@ public class TeleOp extends CommandOpModeEx {
 
         telemetry.addData("Using HeadingPID: ", usingHeadingPID);
         telemetry.addData("cancel: ", cancel);
+        telemetry.addData("is intaking ground bool: ", isIntakingGround);
     }
 
     private void setCancel(boolean b) {
         this.cancel = b;
+    }
+
+    private void setGroundIntakePosition() {
+        if (!isIntakingGround) {
+            effector.setGroundIntakePosition();
+            isIntakingGround = true;
+        } else {
+            effector.setGroundIntakeArm();
+        }
+    }
+
+    private void setIntakingGround(boolean b) {
+        this.isIntakingGround = b;
     }
 }
