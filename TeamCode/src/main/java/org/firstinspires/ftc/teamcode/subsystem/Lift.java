@@ -26,11 +26,11 @@ public class Lift extends SubsystemBase {
     public static int POS_BUCKET_LOW = 1460;
     public static int POS_BUCKET_HIGH = 1460;
 
-    public static int SCORE_DELTA = -580;
+    public static int SCORE_DELTA = -520;
 
     public static int POS_SUB_HIGH_ALT = 940;
 
-    public static double MAX_POWER = 0.5;
+    public static double MAX_POWER = 0.57;
 
     public static double
         kP = 0.025,

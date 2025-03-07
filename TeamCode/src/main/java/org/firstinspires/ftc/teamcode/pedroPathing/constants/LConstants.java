@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.constants;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.pedropathing.localization.*;
 import com.pedropathing.localization.constants.*;
 
+@Config
 public class LConstants {
     static {
         ThreeWheelConstants.forwardTicksToInches = .001989436789;
@@ -18,12 +20,12 @@ public class LConstants {
         ThreeWheelConstants.rightEncoderDirection = Encoder.REVERSE;
         ThreeWheelConstants.strafeEncoderDirection = Encoder.FORWARD;
 
-        DriveEncoderConstants.forwardTicksToInches = 1;
-        DriveEncoderConstants.strafeTicksToInches = 1;
-        DriveEncoderConstants.turnTicksToInches = 1;
+        DriveEncoderConstants.forwardTicksToInches = (0.00845);
+        DriveEncoderConstants.strafeTicksToInches = 0.0077;
+        DriveEncoderConstants.turnTicksToInches = 0.01625;
 
-        DriveEncoderConstants.robot_Width = 1;
-        DriveEncoderConstants.robot_Length = 1;
+        DriveEncoderConstants.robot_Width = 13.5;
+        DriveEncoderConstants.robot_Length = 11.9;
 
         DriveEncoderConstants.leftFrontEncoderDirection = Encoder.REVERSE;
         DriveEncoderConstants.rightFrontEncoderDirection = Encoder.FORWARD;

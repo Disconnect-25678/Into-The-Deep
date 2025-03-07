@@ -130,7 +130,7 @@ public class TeleOp extends CommandOpModeEx {
         new Trigger(
                 () -> !cancel && gamepad1.right_trigger > DEAD_BAND
         ).whileActiveContinuous(
-                new RunCommand(() -> laterator.setScaleTarget(gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)))
+                new RunCommand(() -> laterator.setScaleTargetTrigger(gamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)))
         );
 
         new Trigger(

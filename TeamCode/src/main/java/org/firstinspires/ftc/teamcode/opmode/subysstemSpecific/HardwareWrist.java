@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.common.RobotHardware;
 import org.firstinspires.ftc.teamcode.subsystem.EndEffector;
 
 @Config
-@TeleOp(group = "sub", name = "Hardware-Just-the-Diffy")
+@TeleOp(group = "Sub", name = "Hardware-Just-the-Diffy")
 public class HardwareWrist extends OpMode {
     private EndEffector effector;
 

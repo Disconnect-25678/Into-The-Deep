@@ -31,7 +31,8 @@ public class EndEffector extends SubsystemBase {
 
     public static WristTwistAngles ANGLES_INTAKE_GROUND = new WristTwistAngles(0.28, 0.5);
     public static WristTwistAngles ANGLES_INTAKE_REAR = new WristTwistAngles(0.75, 0.05);
-    public static WristTwistAngles ANGLES_BUCKET = new WristTwistAngles(0.65, 0.15);
+//    public static WristTwistAngles ANGLES_BUCKET = new WristTwistAngles(0.65, 0.15);
+    public static WristTwistAngles ANGLES_BUCKET = new WristTwistAngles(0.99999, 0.47);
     public static WristTwistAngles ANGLES_SUB = new WristTwistAngles(0.75, 0.65);
     public static WristTwistAngles ANGLES_STOW = new WristTwistAngles(0.85, 0.56);
     public static WristTwistAngles ANGLES_INTAKE_GROUND_MID = new WristTwistAngles(0.46, 0.33);
@@ -48,6 +49,7 @@ public class EndEffector extends SubsystemBase {
     public static double ARM_POST_SUB_SCORE = 0.375;
 
     public static long TIME_GRAB_SPECIMEN = 500;
+    public static long TIME_RELEASE_SPECIMEN = 300;
     public static long TIME_ARM_PASSOVER = 100;
     public static long TIME_LIFT_OFF_GROUND_SUB = 900;
 

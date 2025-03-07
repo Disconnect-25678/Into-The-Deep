@@ -17,14 +17,17 @@ public class Laterator extends SubsystemBase {
     public static int TICK_PER_REQ = 250;
     public static double RESET_SPEED = -0.5;
 
-    public static int POS_SUB = 500;
+    public static int POS_SUB = 550;
     public static int POS_REAR_INTAKE = 0;
     public static int POS_BUCKET = 0;
-    public static int POS_SUB_SCORE_THRESHOLD = 350;
+    public static int POS_SUB_SCORE_THRESHOLD = 275;
+    public static int POS_SUB_RETRACT_THRESHOLD = 25;
 
     public static double maxPower = 0.5;
 
     public static double TOLERANCE = 30;
+
+    public static double EXPONENT = 0.35;
 
     public static double
         kP = 0.03,
@@ -69,6 +72,10 @@ public class Laterator extends SubsystemBase {
 
     public boolean atSubScoreThreshold() {
         return this.getCurrentPosition() > POS_SUB_SCORE_THRESHOLD;
+    }
+
+    public boolean atSubRetractThreshold() {
+        return this.getCurrentPosition() < POS_SUB_RETRACT_THRESHOLD;
     }
 
     public void doResetMovement(){
@@ -116,6 +123,13 @@ public class Laterator extends SubsystemBase {
     public void setScaleTarget(double d) {
         double ds = MathUtils.clamp(d, 0d, 1d);
         this.setTarget((int)(ds * (MAX - MIN) + MIN));
+    }
+
+    public void setScaleTargetTrigger(double d) {
+        double s;
+        if (Double.compare(d, 0) == 0) s = 0;
+        else s = Math.pow(d, EXPONENT);
+        setScaleTarget(s);
     }
 
     public void setSubScorePosition() {

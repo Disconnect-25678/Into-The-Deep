@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.command.WaitCommand;
 import com.arcrobotics.ftclib.command.button.Trigger;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.common.RobotHardware;
@@ -18,7 +19,9 @@ import org.firstinspires.ftc.teamcode.subsystem.EndEffector;
 import org.firstinspires.ftc.teamcode.subsystem.Laterator;
 import org.firstinspires.ftc.teamcode.subsystem.Lift;
 
+
 @TeleOp
+@Disabled
 public class TeleOpPrimitive extends CommandOpModeEx {
     public enum ScoreState{
         BUCKET,
